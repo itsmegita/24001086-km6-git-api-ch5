@@ -59,8 +59,8 @@ const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    if ((!email, !password)) {
-      next(new apiError("Email or Password need to be filled", 400));
+    if (!email || !password) {
+      next(new apiError("Email and Password need to be filled", 400));
     }
     const user = await Auth.findOne({
       where: {
@@ -77,8 +77,17 @@ const login = async (req, res, next) => {
           role: user.User.role,
           email: user.email,
         },
-        process.env.JWT_SECRET
+        process.env.JWT_SECRET,
+        {
+          expiresIn: process.env.JWT_EXPIRED,
+        }
       );
+
+      res.status(200).json({
+        status: "Success",
+        message: "Login successfully",
+        data: token,
+      });
     } else {
       next(new apiError("Email or Password isn't correct", 400));
     }
